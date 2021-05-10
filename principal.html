@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.3/css/all.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.3/css/v4-shims.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <title>Document</title>
+</head>
+<body>
+    <!--Navbar-->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <!-- Navbar content -->
+            <div class="container">
+                
+        <a class="navbar-brand" href="#">Inventory</a>
+ 
+ 
+        <div class="navbar-nav">
+           
+         
+          <a type="button" class="btn btn-success text-white" data-toggle="modal" data-target="#exampleModal" style="margin-right: 0.5rem;">Add Product</a>
+          <a class="btn btn-info text-white" href="index.html">Sign In</a>
+          <a type="button" id="btnOut" class="btn btn-danger text-white" onclick="out()" value="click" style="margin-left: 0.5rem;">Sign Out</a>
+        </div>
+
+          
+        
+      </div>
+            </div>
+      </nav>
+     
+    <!--End of navbar-->
+    <div class="container p-4">
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <ul class="list-group">
+                    <li class="card elements">
+                        
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+           <!--Modal start-->
+      <!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Add a product</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+                <label class="form-label" for="name">Name:</label>
+                <input class="form-control" type="text"  id="nameProduct">
+
+                <label class="form-label" for="name">Brand:</label>
+                <input class="form-control" type="text"  id="brandProduct">
+
+                <label class="form-label" for="name">Color:</label>
+                <input class="form-control" type="text"  id="colorProduct">
+
+                <label class="form-label" for="name">Price:</label>
+                <input class="form-control" type="number" step="any"  id="priceProduct">
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="btnSaveProduct" class="btn btn-primary">Save Product</button>
+        </div>
+      </div>
+    </div>
+  </div>
+      <!--End of Modal-->
+           <!--Modal start-->
+    
+    <!--Firebase CDN-->
+    <!-- <script src="index.js"></script> -->
+
+   
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/8.5.0/firebase-app.js"></script>
+
+<!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+<script src="https://www.gstatic.com/firebasejs/8.5.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.5.0/firebase-firestore.js"></script>
+
+<script>
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  var firebaseConfig = {
+    apiKey: "AIzaSyB2kSUYesP4V-ypwOGIAUkZvF0VfybQky4",
+    authDomain: "inventoryproject-14b14.firebaseapp.com",
+    projectId: "inventoryproject-14b14",
+    storageBucket: "inventoryproject-14b14.appspot.com",
+    messagingSenderId: "88073046819",
+    appId: "1:88073046819:web:646b2092f16d5f8f2c5a96",
+    measurementId: "G-3ZNDPWB1FQ"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const authp = firebase.auth();
+  const fs = firebase.firestore();
+  const el = document.querySelector('.elements');
+ 
+  const deleteProduct = id => fs.collection("products").doc(id).delete()
+  const getOneProduct = (id) => fs.collection('products').doc(id).get();  
+  
+
+  const setupProducts = data=>{
+      if(data.length) {
+          let html= '';
+          data.forEach(doc => {
+               const post = doc.data();
+              
+              post.id=doc.id;
+              console.log(post)
+              const li = `
+             
+                <li class="list-group-item list-group-item-action text-center bg-dark text-white">
+                    <h5>${post.nameProduct}</h5>
+                                    <p>Brand: ${post.brandProduct}</p>
+                                    <p>Color: ${post.colorProduct}</p>
+                                    <p>Price: $${post.priceProduct}</p>
+                                    <div>
+                                   
+                                     <button class="btn btn-danger btn-delete" data-toggle="modal" data-target="#exampleModalEdit" data-id="${post.id}">Delete</button>
+                                        </div>
+                    
+                    </li>
+                
+              
+              `;
+             
+              html+=li;
+              
+          });
+            el.innerHTML = html;
+      } else {
+          el.innerHTML = '<p class="text-center">Log In to see posts</p>';
+      }
+      const btnsDelete = document.querySelectorAll('.btn-delete');
+              btnsDelete.forEach(btn=>{
+                  btn.addEventListener('click', async (e)=>{
+                      console.log('clicked');
+                      await deleteProduct(e.target.dataset.id)
+                      alert("Se ha eliminado el producto")
+                      window.location.reload();
+                  })
+              })
+
+            //   const btnsEdit = document.querySelectorAll('.btn-edit');
+            //   btnsEdit.forEach(btn=>{
+            //       btn.addEventListener('click', async e=>{
+            //           console.log('edit with firebase')
+                      
+            //           const doc = await getOneProduct(e.target.dataset.id);
+            //           const post = doc.data();
+            //           $('#exampleModalEdit').modal('show')
+            //           nameProduct.value=post.nameProduct;
+
+            //       })
+            //   })
+
+      
+  }
+  
+authp.onAuthStateChanged(user=> {
+    if(user) {
+        console.log('signIn');
+        console.log(firebase.auth().currentUser);
+        fs.collection('products')
+            .get()
+            .then((snapshot)=>{
+                console.log(snapshot.docs)
+                setupProducts(snapshot.docs);
+            })
+    }else {
+        setupProducts([]);
+        
+    }
+})  
+
+function out(){
+   
+        const btnOut = document.getElementById("btnOut");
+    btnOut.addEventListener('click', (e)=>{
+        e.preventDefault();
+        authp.signOut().then(()=>{
+            alert('Sign Out Successfull')
+        }).catch((error)=>{
+            alert(error);
+        })
+    })
+    
+    
+
+}
+ 
+
+</script>
+<script>
+    //code to save product
+
+    const btnSaveProduct = document.getElementById("btnSaveProduct");
+    btnSaveProduct.addEventListener('click', async (e)=>{
+        e.preventDefault();
+        const nameProduct = document.getElementById("nameProduct").value;
+        const brandProduct = document.getElementById("brandProduct").value;
+        const colorProduct = document.getElementById("colorProduct").value;
+        const priceProduct = document.getElementById("priceProduct").value;
+        
+        const saveProducts = (nameProduct, brandProduct, colorProduct, priceProduct) =>
+        fs.collection('products').doc().set({
+            nameProduct,
+            brandProduct,
+            colorProduct,
+            priceProduct
+        })
+
+
+        await saveProducts(nameProduct, brandProduct, colorProduct, priceProduct);
+        console.log(saveProducts);
+        alert("Product Saved Successfully")
+        window.location.reload();
+    })
+</script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+</html>
